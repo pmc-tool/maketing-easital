@@ -13,25 +13,25 @@ class SpyFuCompetitorService
         $this->api = new SpyFuApiService;
     }
 
-    public function getOrganicCompetitors(string $domain, int $startRow = 0, int $maxRows = 20, string $country = 'US'): array
+    public function getOrganicCompetitors(string $domain, int $pageSize = 20, string $country = 'US'): array
     {
-        return $this->api->getOrganicCompetitors($domain, $startRow, $maxRows, $country);
+        return $this->api->getOrganicCompetitors($domain, $pageSize, $country);
     }
 
-    public function getPaidCompetitors(string $domain, int $startRow = 0, int $maxRows = 20, string $country = 'US'): array
+    public function getPaidCompetitors(string $domain, int $pageSize = 20, string $country = 'US'): array
     {
-        return $this->api->getPaidCompetitors($domain, $startRow, $maxRows, $country);
+        return $this->api->getPaidCompetitors($domain, $pageSize, $country);
     }
 
-    public function getKombatOverlap(array $domains, string $country = 'US'): array
+    public function getCompetingSeoKeywords(array $domains, string $country = 'US', int $pageSize = 50): array
     {
-        return $this->api->getKombatOverlap($domains, $country);
+        return $this->api->getCompetingSeoKeywords($domains, $country, $pageSize);
     }
 
     public function getFullCompetitorReport(string $domain, string $country = 'US'): array
     {
-        $organic = $this->getOrganicCompetitors($domain, 0, 10, $country);
-        $paid = $this->getPaidCompetitors($domain, 0, 10, $country);
+        $organic = $this->getOrganicCompetitors($domain, 10, $country);
+        $paid = $this->getPaidCompetitors($domain, 10, $country);
 
         return [
             'organicCompetitors' => $organic,

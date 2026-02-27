@@ -38,7 +38,7 @@
                         <x-alert class="mt-2">
                             <x-button
                                     variant="link"
-                                    href="https://www.spyfu.com/apis"
+                                    href="https://developer.spyfu.com/"
                                     target="_blank"
                             >
                                 {{ __('Get an API key') }}

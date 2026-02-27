@@ -23,11 +23,19 @@ class SerpTrackerController extends Controller
             }
 
             $rankingService = new SpyFuRankingService;
-            $result = $rankingService->getRankingHistory(
-                $request->domain,
-                $request->keyword,
-                $request->country ?? 'US'
-            );
+
+            if ($request->keyword && $request->domain) {
+                $result = $rankingService->getRankingHistoryForKeyword(
+                    $request->keyword,
+                    [$request->domain],
+                    $request->country ?? 'US'
+                );
+            } else {
+                $result = $rankingService->getRankingHistoryForDomain(
+                    $request->domain,
+                    $request->country ?? 'US'
+                );
+            }
 
             $driver->input(json_encode($result))->calculateCredit()->decreaseCredit();
             Usage::getSingle()->updateWordCounts($driver->calculate());

@@ -13,31 +13,29 @@ class SpyFuKeywordService
         $this->api = new SpyFuApiService;
     }
 
-    public function getKeywordInfo(string $keyword, string $country = 'US'): array
+    public function getRelatedKeywords(string $keyword, int $pageSize = 50, string $country = 'US'): array
     {
-        return $this->api->getKeywordInfo($keyword, $country);
+        return $this->api->getRelatedKeywords($keyword, $pageSize, $country);
     }
 
-    public function getRelatedKeywords(string $keyword, int $startRow = 0, int $maxRows = 50, string $country = 'US'): array
+    public function getQuestionKeywords(string $keyword, int $pageSize = 50, string $country = 'US'): array
     {
-        return $this->api->getRelatedKeywords($keyword, $startRow, $maxRows, $country);
+        return $this->api->getQuestionKeywords($keyword, $pageSize, $country);
     }
 
-    public function getKeywordGroups(string $keyword, string $country = 'US'): array
+    public function getAlsoRanksFor(string $keyword, int $pageSize = 50, string $country = 'US'): array
     {
-        return $this->api->getKeywordGroups($keyword, $country);
+        return $this->api->getAlsoRanksForKeywords($keyword, $pageSize, $country);
     }
 
     public function getFullKeywordReport(string $keyword, string $country = 'US'): array
     {
-        $info = $this->getKeywordInfo($keyword, $country);
-        $related = $this->getRelatedKeywords($keyword, 0, 20, $country);
-        $groups = $this->getKeywordGroups($keyword, $country);
+        $related = $this->getRelatedKeywords($keyword, 20, $country);
+        $questions = $this->getQuestionKeywords($keyword, 10, $country);
 
         return [
-            'info'    => $info,
-            'related' => $related,
-            'groups'  => $groups,
+            'related'   => $related,
+            'questions' => $questions,
         ];
     }
 }

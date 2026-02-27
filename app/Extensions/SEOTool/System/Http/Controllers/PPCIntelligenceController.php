@@ -46,11 +46,18 @@ class PPCIntelligenceController extends Controller
             }
 
             $ppcService = new SpyFuPPCService;
-            $result = $ppcService->getAdHistory(
-                $request->domain,
-                $request->keyword,
-                $request->country ?? 'US'
-            );
+
+            if ($request->keyword) {
+                $result = $ppcService->getKeywordAdHistory(
+                    $request->keyword,
+                    $request->country ?? 'US'
+                );
+            } else {
+                $result = $ppcService->getDomainAdHistory(
+                    $request->domain,
+                    $request->country ?? 'US'
+                );
+            }
 
             $driver->input(json_encode($result))->calculateCredit()->decreaseCredit();
             Usage::getSingle()->updateWordCounts($driver->calculate());

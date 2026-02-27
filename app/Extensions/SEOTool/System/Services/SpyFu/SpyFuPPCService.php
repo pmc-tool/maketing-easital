@@ -13,20 +13,25 @@ class SpyFuPPCService
         $this->api = new SpyFuApiService;
     }
 
-    public function getTopPaidKeywords(string $domain, int $startRow = 0, int $maxRows = 50, string $country = 'US'): array
+    public function getPaidKeywords(string $domain, int $pageSize = 50, string $country = 'US'): array
     {
-        return $this->api->getTopPaidKeywords($domain, $startRow, $maxRows, $country);
+        return $this->api->getPaidKeywords($domain, $pageSize, $country);
     }
 
-    public function getAdHistory(string $domain, string $keyword, string $country = 'US'): array
+    public function getDomainAdHistory(string $domain, string $country = 'US', int $pageSize = 50): array
     {
-        return $this->api->getAdHistory($domain, $keyword, $country);
+        return $this->api->getDomainAdHistory($domain, $country, $pageSize);
+    }
+
+    public function getKeywordAdHistory(string $term, string $country = 'US', int $pageSize = 50): array
+    {
+        return $this->api->getKeywordAdHistory($term, $country, $pageSize);
     }
 
     public function getPPCOverview(string $domain, string $country = 'US'): array
     {
         $stats = $this->api->getDomainStats($domain, $country);
-        $paidKeywords = $this->getTopPaidKeywords($domain, 0, 10, $country);
+        $paidKeywords = $this->getPaidKeywords($domain, 10, $country);
 
         return [
             'stats'        => $stats,

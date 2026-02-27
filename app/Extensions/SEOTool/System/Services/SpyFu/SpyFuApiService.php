@@ -12,7 +12,7 @@ class SpyFuApiService
 {
     private Client $client;
 
-    private string $baseUrl = 'https://www.spyfu.com/apis';
+    private string $baseUrl = 'https://api.spyfu.com/apis';
 
     private string $apiKey;
 
@@ -41,144 +41,253 @@ class SpyFuApiService
         return json_decode($response->getBody()->getContents(), true) ?? [];
     }
 
-    // ─── Domain API v2 ───────────────────────────────────────────
-
-    public function getDomainOrganicKeywords(string $domain, int $startRow = 0, int $maxRows = 50, string $country = 'US'): array
-    {
-        return $this->get('/domain_api/v2/domain/getOrganicKeywords', [
-            'domain'   => $domain,
-            'startRow' => $startRow,
-            'maxRows'  => $maxRows,
-            'country'  => $country,
-        ]);
-    }
-
-    public function getDomainPaidKeywords(string $domain, int $startRow = 0, int $maxRows = 50, string $country = 'US'): array
-    {
-        return $this->get('/domain_api/v2/domain/getPaidKeywords', [
-            'domain'   => $domain,
-            'startRow' => $startRow,
-            'maxRows'  => $maxRows,
-            'country'  => $country,
-        ]);
-    }
+    // ─── Domain Stats API ─────────────────────────────────────────
 
     public function getDomainStats(string $domain, string $country = 'US'): array
     {
         return $this->get('/domain_stats_api/v2/getLatestDomainStats', [
-            'domain'  => $domain,
-            'country' => $country,
+            'domain'      => $domain,
+            'countryCode' => $country,
         ]);
     }
 
-    public function getDomainStatsHistory(string $domain, string $country = 'US'): array
+    public function getAllDomainStats(string $domain, string $country = 'US'): array
     {
-        return $this->get('/domain_stats_api/v2/getDomainStatsHistory', [
-            'domain'  => $domain,
-            'country' => $country,
+        return $this->get('/domain_stats_api/v2/getAllDomainStats', [
+            'domain'      => $domain,
+            'countryCode' => $country,
         ]);
     }
 
-    // ─── Keyword API ─────────────────────────────────────────────
-
-    public function getKeywordInfo(string $keyword, string $country = 'US'): array
+    public function getBulkDomainStats(array $domains, string $country = 'US', bool $latestOnly = true): array
     {
-        return $this->get('/keyword_api/v2/keyword/getKeywordInfo', [
-            'keyword' => $keyword,
-            'country' => $country,
+        return $this->get('/domain_stats_api/v2/getBulkDomainStats', [
+            'domains'        => implode(',', $domains),
+            'countryCode'    => $country,
+            'showOnlyLatest' => $latestOnly ? 'true' : 'false',
         ]);
     }
 
-    public function getRelatedKeywords(string $keyword, int $startRow = 0, int $maxRows = 50, string $country = 'US'): array
+    // ─── SEO Research API (serp_api) ──────────────────────────────
+
+    public function getSeoKeywords(string $domain, int $pageSize = 50, string $country = 'US', string $sortBy = 'SearchVolume'): array
     {
-        return $this->get('/keyword_api/v2/keyword/getRelatedKeywords', [
-            'keyword'  => $keyword,
-            'startRow' => $startRow,
-            'maxRows'  => $maxRows,
-            'country'  => $country,
+        return $this->get('/serp_api/v2/seo/getSeoKeywords', [
+            'query'       => $domain,
+            'pageSize'    => $pageSize,
+            'countryCode' => $country,
+            'sortBy'      => $sortBy,
         ]);
     }
 
-    public function getKeywordGroups(string $keyword, string $country = 'US'): array
+    public function getMostValuableKeywords(string $domain, int $pageSize = 50, string $country = 'US'): array
     {
-        return $this->get('/keyword_api/v2/keyword/getKeywordGroups', [
-            'keyword' => $keyword,
-            'country' => $country,
+        return $this->get('/serp_api/v2/seo/getMostValuableKeywords', [
+            'query'       => $domain,
+            'pageSize'    => $pageSize,
+            'countryCode' => $country,
         ]);
     }
 
-    // ─── Competitor / Kombat API ─────────────────────────────────
-
-    public function getOrganicCompetitors(string $domain, int $startRow = 0, int $maxRows = 20, string $country = 'US'): array
+    public function getNewlyRankedKeywords(string $domain, int $pageSize = 50, string $country = 'US'): array
     {
-        return $this->get('/domain_api/v2/domain/getOrganicCompetitors', [
-            'domain'   => $domain,
-            'startRow' => $startRow,
-            'maxRows'  => $maxRows,
-            'country'  => $country,
+        return $this->get('/serp_api/v2/seo/getNewlyRankedKeywords', [
+            'query'       => $domain,
+            'pageSize'    => $pageSize,
+            'countryCode' => $country,
         ]);
     }
 
-    public function getPaidCompetitors(string $domain, int $startRow = 0, int $maxRows = 20, string $country = 'US'): array
+    // ─── PPC Research API (serp_api) ──────────────────────────────
+
+    public function getPaidKeywords(string $domain, int $pageSize = 50, string $country = 'US'): array
     {
-        return $this->get('/domain_api/v2/domain/getPaidCompetitors', [
-            'domain'   => $domain,
-            'startRow' => $startRow,
-            'maxRows'  => $maxRows,
-            'country'  => $country,
+        return $this->get('/serp_api/v2/ppc/getPaidSerps', [
+            'query'       => $domain,
+            'pageSize'    => $pageSize,
+            'countryCode' => $country,
         ]);
     }
 
-    public function getKombatOverlap(array $domains, string $country = 'US'): array
+    public function getMostSuccessfulPpcKeywords(string $domain, int $pageSize = 50, string $country = 'US'): array
     {
-        return $this->get('/kombat_api/v2/getOverlap', [
-            'domains' => implode(',', $domains),
-            'country' => $country,
+        return $this->get('/serp_api/v2/ppc/getMostSuccessful', [
+            'query'       => $domain,
+            'pageSize'    => $pageSize,
+            'countryCode' => $country,
         ]);
     }
 
-    // ─── Backlink API ────────────────────────────────────────────
+    // ─── Keyword Research API (keyword_api) ───────────────────────
 
-    public function getBacklinks(string $domain, int $startRow = 0, int $maxRows = 50): array
+    public function getRelatedKeywords(string $keyword, int $pageSize = 50, string $country = 'US', string $sortBy = 'SearchVolume'): array
     {
-        return $this->get('/backlink_api/v2/getBacklinks', [
-            'domain'   => $domain,
-            'startRow' => $startRow,
-            'maxRows'  => $maxRows,
+        return $this->get('/keyword_api/v2/related/getRelatedKeywords', [
+            'query'       => $keyword,
+            'pageSize'    => $pageSize,
+            'countryCode' => $country,
+            'sortBy'      => $sortBy,
         ]);
     }
 
-    public function getBacklinkStats(string $domain): array
+    public function getQuestionKeywords(string $keyword, int $pageSize = 50, string $country = 'US'): array
     {
-        return $this->get('/backlink_api/v2/getBacklinkStats', [
-            'domain' => $domain,
+        return $this->get('/keyword_api/v2/related/getQuestionKeywords', [
+            'query'       => $keyword,
+            'pageSize'    => $pageSize,
+            'countryCode' => $country,
         ]);
     }
 
-    // ─── Ranking History API ─────────────────────────────────────
-
-    public function getRankingHistory(string $domain, string $keyword, string $country = 'US'): array
+    public function getAlsoRanksForKeywords(string $keyword, int $pageSize = 50, string $country = 'US'): array
     {
-        return $this->get('/domain_api/v2/domain/getRankingHistory', [
-            'domain'  => $domain,
-            'keyword' => $keyword,
-            'country' => $country,
+        return $this->get('/keyword_api/v2/related/getAlsoRanksForKeywords', [
+            'query'       => $keyword,
+            'pageSize'    => $pageSize,
+            'countryCode' => $country,
         ]);
     }
 
-    // ─── PPC / Ad History API ────────────────────────────────────
-
-    public function getAdHistory(string $domain, string $keyword, string $country = 'US'): array
+    public function getTransactionalKeywords(string $keyword, int $pageSize = 50, string $country = 'US'): array
     {
-        return $this->get('/domain_api/v2/domain/getAdHistory', [
-            'domain'  => $domain,
-            'keyword' => $keyword,
-            'country' => $country,
+        return $this->get('/keyword_api/v2/related/getTransactionKeywords', [
+            'query'       => $keyword,
+            'pageSize'    => $pageSize,
+            'countryCode' => $country,
         ]);
     }
 
-    public function getTopPaidKeywords(string $domain, int $startRow = 0, int $maxRows = 50, string $country = 'US'): array
+    public function getKeywordInfoBulk(array $keywords, string $country = 'US'): array
     {
-        return $this->getDomainPaidKeywords($domain, $startRow, $maxRows, $country);
+        return $this->get('/keyword_api/v2/related/getKeywordInformationBulk', [
+            'query'       => implode(',', $keywords),
+            'countryCode' => $country,
+        ]);
+    }
+
+    // ─── Competitors API ──────────────────────────────────────────
+
+    public function getOrganicCompetitors(string $domain, int $pageSize = 20, string $country = 'US', int $startingRow = 1): array
+    {
+        return $this->get('/competitors_api/v2/seo/getTopCompetitors', [
+            'domain'      => $domain,
+            'pageSize'    => $pageSize,
+            'countryCode' => $country,
+            'startingRow' => $startingRow,
+        ]);
+    }
+
+    public function getPaidCompetitors(string $domain, int $pageSize = 20, string $country = 'US', int $startingRow = 1): array
+    {
+        return $this->get('/competitors_api/v2/ppc/getTopCompetitors', [
+            'domain'      => $domain,
+            'pageSize'    => $pageSize,
+            'countryCode' => $country,
+            'startingRow' => $startingRow,
+        ]);
+    }
+
+    public function getCombinedCompetitors(string $domain, int $pageSize = 20, string $country = 'US'): array
+    {
+        return $this->get('/competitors_api/v2/combined/getCombinedTopCompetitors', [
+            'domain'      => $domain,
+            'pageSize'    => $pageSize,
+            'countryCode' => $country,
+        ]);
+    }
+
+    // ─── Kombat API ───────────────────────────────────────────────
+
+    public function getCompetingSeoKeywords(array $domains, string $country = 'US', int $pageSize = 50, bool $isIntersection = true): array
+    {
+        return $this->get('/keyword_api/v2/kombat/getCompetingSeoKeywords', [
+            'includeDomainsCsv' => implode(',', $domains),
+            'isIntersection'    => $isIntersection ? 'true' : 'false',
+            'pageSize'          => $pageSize,
+            'countryCode'       => $country,
+        ]);
+    }
+
+    public function getCompetingPpcKeywords(array $domains, string $country = 'US', int $pageSize = 50, bool $isIntersection = true): array
+    {
+        return $this->get('/keyword_api/v2/kombat/getCompetingPpcKeywords', [
+            'includeDomainsCsv' => implode(',', $domains),
+            'isIntersection'    => $isIntersection ? 'true' : 'false',
+            'pageSize'          => $pageSize,
+            'countryCode'       => $country,
+        ]);
+    }
+
+    // ─── Ranking History API (organic_history_api) ────────────────
+
+    public function getRankingHistoryForDomain(string $domain, string $country = 'US', int $pageSize = 50, string $startDate = '', string $endDate = ''): array
+    {
+        $params = [
+            'domain'      => $domain,
+            'countryCode' => $country,
+            'pageSize'    => $pageSize,
+        ];
+        if ($startDate) {
+            $params['startDate'] = $startDate;
+        }
+        if ($endDate) {
+            $params['endDate'] = $endDate;
+        }
+
+        return $this->get('/organic_history_api/v2/historic/getHistoricRankingsForDomain', $params);
+    }
+
+    public function getRankingHistoryForKeywordOnDomains(string $keyword, array $domains, string $country = 'US', string $startDate = '', string $endDate = ''): array
+    {
+        $params = [
+            'keyword'     => $keyword,
+            'domains'     => implode(',', $domains),
+            'countryCode' => $country,
+        ];
+        if ($startDate) {
+            $params['startDate'] = $startDate;
+        }
+        if ($endDate) {
+            $params['endDate'] = $endDate;
+        }
+
+        return $this->get('/organic_history_api/v2/historic/getHistoricRankingsForKeywordOnDomains', $params);
+    }
+
+    public function getRankingHistoryForDomainOnKeywords(string $domain, array $keywords, string $country = 'US', string $startDate = '', string $endDate = ''): array
+    {
+        $params = [
+            'domain'      => $domain,
+            'keywords'    => implode(',', $keywords),
+            'countryCode' => $country,
+        ];
+        if ($startDate) {
+            $params['startDate'] = $startDate;
+        }
+        if ($endDate) {
+            $params['endDate'] = $endDate;
+        }
+
+        return $this->get('/organic_history_api/v2/historic/getHistoricRankingsForDomainOnKeywords', $params);
+    }
+
+    // ─── Ad History API (cloud_ad_history_api) ────────────────────
+
+    public function getDomainAdHistory(string $domain, string $country = 'US', int $pageSize = 50): array
+    {
+        return $this->get('/cloud_ad_history_api/v2/domain/getDomainAdHistory', [
+            'domain'      => $domain,
+            'countryCode' => $country,
+            'pageSize'    => $pageSize,
+        ]);
+    }
+
+    public function getKeywordAdHistory(string $term, string $country = 'US', int $pageSize = 50): array
+    {
+        return $this->get('/cloud_ad_history_api/v2/term/getTermAdHistory', [
+            'term'        => $term,
+            'countryCode' => $country,
+            'pageSize'    => $pageSize,
+        ]);
     }
 }

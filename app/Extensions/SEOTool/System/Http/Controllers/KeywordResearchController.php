@@ -48,8 +48,7 @@ class KeywordResearchController extends Controller
             $keywordService = new SpyFuKeywordService;
             $result = $keywordService->getRelatedKeywords(
                 $request->keyword,
-                $request->startRow ?? 0,
-                $request->maxRows ?? 50,
+                (int) ($request->pageSize ?? 50),
                 $request->country ?? 'US'
             );
 

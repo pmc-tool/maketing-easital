@@ -47,7 +47,7 @@ class CompetitorAnalysisController extends Controller
 
             $competitorService = new SpyFuCompetitorService;
             $domains = array_filter(explode(',', $request->domains));
-            $result = $competitorService->getKombatOverlap($domains, $request->country ?? 'US');
+            $result = $competitorService->getCompetingSeoKeywords($domains, $request->country ?? 'US');
 
             $driver->input(json_encode($result))->calculateCredit()->decreaseCredit();
             Usage::getSingle()->updateWordCounts($driver->calculate());

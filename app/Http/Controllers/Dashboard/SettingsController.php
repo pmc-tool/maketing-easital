@@ -683,16 +683,14 @@ class SettingsController extends Controller
                 return;
             }
             $client = new Client;
-            $response = $client->get('https://www.spyfu.com/apis/domain_api/v2/domain/getOrganicKeywords', [
+            $response = $client->get('https://api.spyfu.com/apis/domain_stats_api/v2/getLatestDomainStats', [
                 'headers' => [
                     'Authorization' => 'Basic ' . $settings->spyfu_api_key,
                     'Accept'        => 'application/json',
                 ],
                 'query' => [
-                    'domain'   => 'google.com',
-                    'startRow' => 0,
-                    'maxRows'  => 1,
-                    'country'  => 'US',
+                    'domain'      => 'google.com',
+                    'countryCode' => 'US',
                 ],
             ]);
             $responseData = json_decode($response->getBody(), true);

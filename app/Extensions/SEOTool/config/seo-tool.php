@@ -5,7 +5,7 @@ return [
 
     // SpyFu configuration
     'spyfu' => [
-        'base_url' => 'https://www.spyfu.com/apis',
+        'base_url' => 'https://api.spyfu.com/apis',
         'timeout'  => 30,
         'cache_ttl' => 60, // minutes
     ],
