@@ -1,0 +1,6 @@
+{
+  "name": "Wordpress",
+  "type": "extension",
+  "version": "3.3",
+  "description": "Wordpress extension for magicai"
+}

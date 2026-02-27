@@ -1,0 +1,7 @@
+{
+  "name": "AI News",
+  "slug": "ai-news",
+  "type": "extension",
+  "version": "1.0",
+  "description": "Generate professional news videos with AI avatars or your own photo, custom backgrounds, and voiceovers using HeyGen."
+}

@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://192.168.200.201/sitemap.xml
