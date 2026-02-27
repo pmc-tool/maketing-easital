@@ -14,8 +14,8 @@
             country: this.country
         });
         if (data && data.result) {
-            this.organicCompetitors = data.result.organicCompetitors?.results || data.result.organicCompetitors || [];
-            this.paidCompetitors = data.result.paidCompetitors?.results || data.result.paidCompetitors || [];
+            this.organicCompetitors = data.result.organicCompetitors?.results || [];
+            this.paidCompetitors = data.result.paidCompetitors?.results || [];
         }
     },
 
@@ -25,7 +25,7 @@
             domains: this.kombatDomains,
             country: this.country
         });
-        if (data) this.kombatResult = data.result;
+        if (data && data.result) this.kombatResult = data.result;
     }
 }">
     <div class="mb-6">
@@ -44,10 +44,10 @@
         <div class="mb-8">
             <div class="mb-4 flex gap-2 border-b border-border">
                 <button class="border-b-2 px-4 py-2 text-sm font-medium transition-colors" :class="activeTab === 'organic' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-heading-foreground'" @click="activeTab = 'organic'">
-                    {{ __('Organic Competitors') }} (<span x-text="organicCompetitors.length"></span>)
+                    {{ __('SEO Competitors') }} (<span x-text="organicCompetitors.length"></span>)
                 </button>
                 <button class="border-b-2 px-4 py-2 text-sm font-medium transition-colors" :class="activeTab === 'paid' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-heading-foreground'" @click="activeTab = 'paid'">
-                    {{ __('Paid Competitors') }} (<span x-text="paidCompetitors.length"></span>)
+                    {{ __('PPC Competitors') }} (<span x-text="paidCompetitors.length"></span>)
                 </button>
             </div>
 
@@ -59,15 +59,15 @@
                             <tr>
                                 <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Domain') }}</th>
                                 <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Common Keywords') }}</th>
-                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Relevancy') }}</th>
+                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Overlap Score') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             <template x-for="(comp, i) in organicCompetitors" :key="i">
                                 <tr class="border-t border-border transition-colors hover:bg-foreground/3">
-                                    <td class="px-4 py-3 font-medium text-heading-foreground" x-text="comp.domain || comp.competitorDomain || comp"></td>
-                                    <td class="px-4 py-3 text-foreground" x-text="(comp.commonKeywords || comp.commonTerms || '-').toLocaleString()"></td>
-                                    <td class="px-4 py-3 text-foreground" x-text="comp.relevancy ? (comp.relevancy * 100).toFixed(1) + '%' : '-'"></td>
+                                    <td class="px-4 py-3 font-medium text-heading-foreground" x-text="comp.domain"></td>
+                                    <td class="px-4 py-3 text-foreground" x-text="(comp.commonTerms || 0).toLocaleString()"></td>
+                                    <td class="px-4 py-3 text-foreground" x-text="comp.rank ? comp.rank.toFixed(6) : '-'"></td>
                                 </tr>
                             </template>
                         </tbody>
@@ -83,15 +83,15 @@
                             <tr>
                                 <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Domain') }}</th>
                                 <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Common Keywords') }}</th>
-                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Relevancy') }}</th>
+                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Overlap Score') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             <template x-for="(comp, i) in paidCompetitors" :key="i">
                                 <tr class="border-t border-border transition-colors hover:bg-foreground/3">
-                                    <td class="px-4 py-3 font-medium text-heading-foreground" x-text="comp.domain || comp.competitorDomain || comp"></td>
-                                    <td class="px-4 py-3 text-foreground" x-text="(comp.commonKeywords || comp.commonTerms || '-').toLocaleString()"></td>
-                                    <td class="px-4 py-3 text-foreground" x-text="comp.relevancy ? (comp.relevancy * 100).toFixed(1) + '%' : '-'"></td>
+                                    <td class="px-4 py-3 font-medium text-heading-foreground" x-text="comp.domain"></td>
+                                    <td class="px-4 py-3 text-foreground" x-text="(comp.commonTerms || 0).toLocaleString()"></td>
+                                    <td class="px-4 py-3 text-foreground" x-text="comp.rank ? comp.rank.toFixed(6) : '-'"></td>
                                 </tr>
                             </template>
                         </tbody>
@@ -103,8 +103,8 @@
 
     {{-- Kombat Section --}}
     <div class="rounded-xl border border-border bg-background p-6">
-        <h3 class="mb-4 text-sm font-semibold text-heading-foreground">{{ __('Kombat - Keyword Overlap') }}</h3>
-        <p class="mb-4 text-xs text-foreground/60">{{ __('Compare up to 3 domains to see keyword overlap.') }}</p>
+        <h3 class="mb-4 text-sm font-semibold text-heading-foreground">{{ __('Kombat - SEO Keyword Overlap') }}</h3>
+        <p class="mb-4 text-xs text-foreground/60">{{ __('Compare up to 3 domains to see shared SEO keywords.') }}</p>
         <div class="flex gap-2">
             <input
                 class="form-control flex-1"
@@ -117,9 +117,41 @@
             </x-button>
         </div>
 
-        <template x-if="kombatResult">
-            <div class="mt-4 rounded-lg border border-border bg-foreground/5 p-4">
-                <pre class="overflow-auto text-xs text-foreground" x-text="JSON.stringify(kombatResult, null, 2)"></pre>
+        <template x-if="kombatResult && kombatResult.results?.length > 0">
+            <div class="mt-4">
+                <p class="mb-3 text-xs text-foreground/50" x-text="(kombatResult.totalMatchingResults || kombatResult.resultCount || 0) + ' shared keywords found'"></p>
+                <div class="overflow-x-auto rounded-lg border border-border">
+                    <table class="w-full text-sm">
+                        <thead class="bg-foreground/5">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Keyword') }}</th>
+                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Volume') }}</th>
+                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Difficulty') }}</th>
+                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('CPC') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="(kw, i) in kombatResult.results" :key="i">
+                                <tr class="border-t border-border transition-colors hover:bg-foreground/3">
+                                    <td class="px-4 py-3 font-medium text-heading-foreground" x-text="kw.keyword"></td>
+                                    <td class="px-4 py-3 text-foreground" x-text="(kw.searchVolume || 0).toLocaleString()"></td>
+                                    <td class="px-4 py-3">
+                                        <span class="rounded px-2 py-0.5 text-xs font-medium"
+                                            :class="(kw.rankingDifficulty || 0) > 60 ? 'bg-red-100 text-red-700' : (kw.rankingDifficulty || 0) > 30 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'"
+                                            x-text="kw.rankingDifficulty ?? '-'"></span>
+                                    </td>
+                                    <td class="px-4 py-3 text-foreground" x-text="kw.broadCostPerClick ? '$' + kw.broadCostPerClick.toFixed(2) : '-'"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </template>
+
+        <template x-if="kombatResult && (!kombatResult.results || kombatResult.results.length === 0)">
+            <div class="mt-4 rounded-lg border border-border bg-foreground/5 p-4 text-center text-sm text-foreground/50">
+                {{ __('No shared keywords found between these domains.') }}
             </div>
         </template>
     </div>

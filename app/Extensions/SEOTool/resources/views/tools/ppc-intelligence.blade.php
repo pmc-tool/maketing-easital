@@ -14,19 +14,31 @@
         });
         if (data && data.result) {
             this.ppcData = data.result;
-            // Flatten stats from results[0]
             this.ppcData._stats = data.result.stats?.results?.[0] || {};
         }
     },
 
     async getAdHistory() {
-        if (!this.domain || !this.keyword) { toastr.warning('{{ __('Please enter both domain and keyword') }}'); return; }
+        if (!this.domain && !this.keyword) { toastr.warning('{{ __('Please enter a domain or keyword') }}'); return; }
         const data = await this.postRequest('/dashboard/user/seo/ppc/ad-history', {
             domain: this.domain,
             keyword: this.keyword,
             country: this.country
         });
         if (data && data.result) this.adHistory = data.result;
+    },
+
+    formatAdDate(dateId) {
+        if (!dateId) return '-';
+        const str = String(dateId);
+        // Format: YYYYMMDD
+        if (str.length === 8) {
+            const y = str.substring(0, 4);
+            const m = str.substring(4, 6);
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return months[parseInt(m) - 1] + ' ' + y;
+        }
+        return str;
     }
 }">
     <div class="mb-6">
@@ -68,7 +80,7 @@
                 </div>
 
                 {{-- Paid Keywords Table --}}
-                <template x-if="ppcData.paidKeywords">
+                <template x-if="ppcData.paidKeywords?.results?.length > 0">
                     <div>
                         <h3 class="mb-4 text-sm font-semibold text-heading-foreground">{{ __('Top Paid Keywords') }}</h3>
                         <div class="overflow-x-auto rounded-lg border border-border">
@@ -76,18 +88,22 @@
                                 <thead class="bg-foreground/5">
                                     <tr>
                                         <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Keyword') }}</th>
-                                        <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('CPC') }}</th>
-                                        <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Volume') }}</th>
                                         <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Ad Position') }}</th>
+                                        <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Volume') }}</th>
+                                        <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Difficulty') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <template x-for="(kw, i) in (ppcData.paidKeywords?.results || ppcData.paidKeywords || [])" :key="i">
+                                    <template x-for="(kw, i) in ppcData.paidKeywords.results" :key="i">
                                         <tr class="border-t border-border transition-colors hover:bg-foreground/3">
-                                            <td class="px-4 py-3 font-medium text-heading-foreground" x-text="kw.keyword || kw.term || kw"></td>
-                                            <td class="px-4 py-3 text-foreground" x-text="kw.costPerClick ? '$' + kw.costPerClick.toFixed(2) : '-'"></td>
+                                            <td class="px-4 py-3 font-medium text-heading-foreground" x-text="kw.keyword"></td>
+                                            <td class="px-4 py-3 text-foreground" x-text="kw.adPosition || '-'"></td>
                                             <td class="px-4 py-3 text-foreground" x-text="(kw.searchVolume || 0).toLocaleString()"></td>
-                                            <td class="px-4 py-3 text-foreground" x-text="kw.adPosition || kw.position || '-'"></td>
+                                            <td class="px-4 py-3">
+                                                <span class="rounded px-2 py-0.5 text-xs font-medium"
+                                                    :class="(kw.keywordDifficulty || 0) > 60 ? 'bg-red-100 text-red-700' : (kw.keywordDifficulty || 0) > 30 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'"
+                                                    x-text="kw.keywordDifficulty ?? '-'"></span>
+                                            </td>
                                         </tr>
                                     </template>
                                 </tbody>
@@ -102,9 +118,10 @@
     {{-- Ad History --}}
     <div x-show="activeTab === 'adhistory'">
         <div class="mb-6 rounded-xl border border-border bg-background p-6">
+            <p class="mb-3 text-xs text-foreground/50">{{ __('Enter a domain to see its ad history, or a keyword to see which ads have targeted it.') }}</p>
             <div class="flex gap-2">
-                <input class="form-control w-1/3" type="text" x-model="domain" placeholder="{{ __('Domain') }}" />
-                <input class="form-control flex-1" type="text" x-model="keyword" placeholder="{{ __('Keyword') }}" />
+                <input class="form-control w-1/3" type="text" x-model="domain" placeholder="{{ __('Domain (optional)') }}" />
+                <input class="form-control flex-1" type="text" x-model="keyword" placeholder="{{ __('Keyword (optional)') }}" />
                 <select class="form-control w-24" x-model="country">
                     <option value="US">US</option>
                     <option value="GB">UK</option>
@@ -114,29 +131,40 @@
             </div>
         </div>
 
-        <template x-if="adHistory">
+        <template x-if="adHistory && adHistory.results?.length > 0">
             <div class="rounded-xl border border-border bg-background p-6">
-                <h3 class="mb-4 text-sm font-semibold text-heading-foreground">{{ __('Ad History') }}</h3>
+                <h3 class="mb-4 text-sm font-semibold text-heading-foreground">
+                    {{ __('Ad History') }}
+                    <span class="ml-2 text-xs font-normal text-foreground/50" x-text="'(' + adHistory.results.length + ' ads)'"></span>
+                </h3>
                 <div class="overflow-x-auto rounded-lg border border-border">
                     <table class="w-full text-sm">
                         <thead class="bg-foreground/5">
                             <tr>
-                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Period') }}</th>
-                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Ad Copy') }}</th>
+                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Date') }}</th>
                                 <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Position') }}</th>
+                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Ad Title') }}</th>
+                                <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('URL') }}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <template x-for="(ad, i) in (Array.isArray(adHistory) ? adHistory : (adHistory.results || []))" :key="i">
+                            <template x-for="(ad, i) in adHistory.results" :key="i">
                                 <tr class="border-t border-border transition-colors hover:bg-foreground/3">
-                                    <td class="px-4 py-3 text-foreground" x-text="ad.month || ad.date || 'Period ' + (i + 1)"></td>
-                                    <td class="max-w-md px-4 py-3 text-xs text-foreground" x-text="ad.adTitle || ad.title || ad.adCopy || '-'"></td>
-                                    <td class="px-4 py-3 text-foreground" x-text="ad.position || ad.rank || '-'"></td>
+                                    <td class="whitespace-nowrap px-4 py-3 text-foreground" x-text="formatAdDate(ad.searchDateId)"></td>
+                                    <td class="px-4 py-3 text-foreground" x-text="ad.position || '-'"></td>
+                                    <td class="max-w-md px-4 py-3 text-sm text-heading-foreground" x-text="ad.title || '-'"></td>
+                                    <td class="max-w-xs truncate px-4 py-3 text-xs text-foreground/60" x-text="ad.url || '-'"></td>
                                 </tr>
                             </template>
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </template>
+
+        <template x-if="adHistory && (!adHistory.results || adHistory.results.length === 0)">
+            <div class="rounded-xl border border-border bg-background p-8 text-center text-sm text-foreground/50">
+                {{ __('No ad history found for this query.') }}
             </div>
         </template>
     </div>
