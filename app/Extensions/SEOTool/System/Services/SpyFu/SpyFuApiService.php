@@ -231,53 +231,35 @@ class SpyFuApiService
 
     public function getRankingHistoryForDomain(string $domain, string $country = 'US', int $pageSize = 50, string $startDate = '', string $endDate = ''): array
     {
-        $params = [
+        return $this->get('/organic_history_api/v2/historic/getHistoricRankingsForDomain', [
             'domain'      => $domain,
             'countryCode' => $country,
             'pageSize'    => $pageSize,
-        ];
-        if ($startDate) {
-            $params['startDate'] = $startDate;
-        }
-        if ($endDate) {
-            $params['endDate'] = $endDate;
-        }
-
-        return $this->get('/organic_history_api/v2/historic/getHistoricRankingsForDomain', $params);
+            'startDate'   => $startDate ?: date('Y-m-d', strtotime('-12 months')),
+            'endDate'     => $endDate ?: date('Y-m-d'),
+        ]);
     }
 
     public function getRankingHistoryForKeywordOnDomains(string $keyword, array $domains, string $country = 'US', string $startDate = '', string $endDate = ''): array
     {
-        $params = [
+        return $this->get('/organic_history_api/v2/historic/getHistoricRankingsForKeywordOnDomains', [
             'keyword'     => $keyword,
             'domains'     => implode(',', $domains),
             'countryCode' => $country,
-        ];
-        if ($startDate) {
-            $params['startDate'] = $startDate;
-        }
-        if ($endDate) {
-            $params['endDate'] = $endDate;
-        }
-
-        return $this->get('/organic_history_api/v2/historic/getHistoricRankingsForKeywordOnDomains', $params);
+            'startDate'   => $startDate ?: date('Y-m-d', strtotime('-12 months')),
+            'endDate'     => $endDate ?: date('Y-m-d'),
+        ]);
     }
 
     public function getRankingHistoryForDomainOnKeywords(string $domain, array $keywords, string $country = 'US', string $startDate = '', string $endDate = ''): array
     {
-        $params = [
+        return $this->get('/organic_history_api/v2/historic/getHistoricRankingsForDomainOnKeywords', [
             'domain'      => $domain,
             'keywords'    => implode(',', $keywords),
             'countryCode' => $country,
-        ];
-        if ($startDate) {
-            $params['startDate'] = $startDate;
-        }
-        if ($endDate) {
-            $params['endDate'] = $endDate;
-        }
-
-        return $this->get('/organic_history_api/v2/historic/getHistoricRankingsForDomainOnKeywords', $params);
+            'startDate'   => $startDate ?: date('Y-m-d', strtotime('-12 months')),
+            'endDate'     => $endDate ?: date('Y-m-d'),
+        ]);
     }
 
     // ─── Ad History API (cloud_ad_history_api) ────────────────────

@@ -29,27 +29,42 @@
         if (data && data.result) this.domainHistory = data.result;
     },
 
+    formatYYYYMM(ym) {
+        const str = String(ym);
+        const year = str.substring(0, 4);
+        const month = str.substring(4);
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return months[parseInt(month) - 1] + ' ' + year;
+    },
+
     renderChart() {
         if (!this.rankingHistory) return;
-        const history = Array.isArray(this.rankingHistory) ? this.rankingHistory : (this.rankingHistory.results || []);
-        if (history.length === 0) return;
+        const results = this.rankingHistory.results || [];
+        if (results.length === 0) return;
 
-        const labels = history.map((h, i) => h.month || h.date || 'Period ' + (i + 1));
-        const ranks = history.map(h => h.rank || h.position || h.rankNumber || 0);
+        // For keyword tracking: results[0].results is {YYYYMM: rank}
+        const item = results[0];
+        const rankData = item.results || item.historicalRanks || {};
+        const sortedKeys = Object.keys(rankData).sort();
+
+        if (sortedKeys.length === 0) return;
+
+        const labels = sortedKeys.map(k => this.formatYYYYMM(k));
+        const ranks = sortedKeys.map(k => rankData[k]);
 
         if (this.chart) this.chart.destroy();
-
         const el = document.getElementById('serp-chart');
         if (!el) return;
 
         this.chart = new ApexCharts(el, {
             chart: { type: 'line', height: 300, toolbar: { show: false } },
-            series: [{ name: '{{ __('Rank Position') }}', data: ranks }],
+            series: [{ name: item.keyword || this.keyword, data: ranks }],
             xaxis: { categories: labels },
-            yaxis: { reversed: true, title: { text: '{{ __('Position') }}' } },
+            yaxis: { reversed: true, min: 1, title: { text: '{{ __('Position') }}' } },
             colors: ['hsl(var(--primary))'],
             stroke: { curve: 'smooth', width: 2 },
-            markers: { size: 4 }
+            markers: { size: 4 },
+            tooltip: { y: { formatter: (val) => 'Rank #' + val } }
         });
         this.chart.render();
     }
@@ -68,8 +83,8 @@
 
         <div x-show="activeTab === 'keyword'">
             <div class="flex gap-2">
-                <input class="form-control w-1/3" type="text" x-model="domain" placeholder="{{ __('Domain') }}" />
-                <input class="form-control flex-1" type="text" x-model="keyword" placeholder="{{ __('Keyword') }}" />
+                <input class="form-control w-1/3" type="text" x-model="domain" placeholder="{{ __('Domain (e.g. themeforest.net)') }}" />
+                <input class="form-control flex-1" type="text" x-model="keyword" placeholder="{{ __('Keyword (e.g. wordpress themes)') }}" />
                 <select class="form-control w-24" x-model="country">
                     <option value="US">US</option>
                     <option value="GB">UK</option>
@@ -88,35 +103,68 @@
         </div>
     </div>
 
-    {{-- Ranking Chart --}}
+    {{-- Keyword Ranking Chart --}}
     <template x-if="rankingHistory && activeTab === 'keyword'">
-        <div class="mb-8 rounded-xl border border-border bg-background p-6">
-            <h3 class="mb-4 text-sm font-semibold text-heading-foreground">{{ __('Ranking History') }}</h3>
-            <div id="serp-chart"></div>
+        <div>
+            {{-- Info --}}
+            <template x-if="rankingHistory.results?.length > 0">
+                <div class="mb-4 flex flex-wrap gap-3">
+                    <template x-for="(item, i) in rankingHistory.results" :key="i">
+                        <div class="rounded-lg border border-border bg-background px-4 py-2">
+                            <span class="text-xs text-foreground/60" x-text="item.domain || item.keyword"></span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg font-bold text-heading-foreground" x-text="'#' + (item.endRank || item.startRank || '-')"></span>
+                                <template x-if="(item.rankChange || 0) !== 0">
+                                    <span class="text-xs font-medium" :class="item.rankChange > 0 ? 'text-red-500' : 'text-green-600'" x-text="(item.rankChange > 0 ? '+' : '') + item.rankChange"></span>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <div class="mb-8 rounded-xl border border-border bg-background p-6">
+                <h3 class="mb-4 text-sm font-semibold text-heading-foreground">{{ __('Ranking History') }}</h3>
+                <div id="serp-chart"></div>
+            </div>
+        </div>
+    </template>
+
+    {{-- No results message --}}
+    <template x-if="rankingHistory && (!rankingHistory.results || rankingHistory.results.length === 0) && activeTab === 'keyword'">
+        <div class="rounded-xl border border-border bg-background p-8 text-center">
+            <p class="text-sm text-foreground/50">{{ __('No ranking data found for this keyword/domain combination. Try a more popular keyword.') }}</p>
         </div>
     </template>
 
     {{-- Domain History Data --}}
     <template x-if="domainHistory && activeTab === 'domain'">
         <div class="rounded-xl border border-border bg-background p-6">
-            <h3 class="mb-4 text-sm font-semibold text-heading-foreground">{{ __('Domain Stats History') }}</h3>
+            <h3 class="mb-4 text-sm font-semibold text-heading-foreground">
+                {{ __('Domain Ranking History') }}
+                <span class="ml-2 text-xs font-normal text-foreground/50" x-text="'(' + (domainHistory.totalMatchingResults || domainHistory.resultCount || 0) + ' keywords tracked)'"></span>
+            </h3>
             <div class="overflow-x-auto rounded-lg border border-border">
                 <table class="w-full text-sm">
                     <thead class="bg-foreground/5">
                         <tr>
-                            <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Period') }}</th>
-                            <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Organic Keywords') }}</th>
-                            <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Organic Clicks') }}</th>
-                            <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Paid Keywords') }}</th>
+                            <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Keyword') }}</th>
+                            <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Current Rank') }}</th>
+                            <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Change') }}</th>
+                            <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Volume') }}</th>
+                            <th class="px-4 py-3 text-left font-semibold text-heading-foreground">{{ __('Clicks') }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <template x-for="(entry, i) in (Array.isArray(domainHistory) ? domainHistory : (domainHistory.results || []))" :key="i">
+                        <template x-for="(entry, i) in (domainHistory.results || [])" :key="i">
                             <tr class="border-t border-border transition-colors hover:bg-foreground/3">
-                                <td class="px-4 py-3 text-foreground" x-text="entry.month || entry.date || 'Period ' + (i + 1)"></td>
-                                <td class="px-4 py-3 text-foreground" x-text="(entry.organicKeywords || entry.totalOrganicResults || 0).toLocaleString()"></td>
-                                <td class="px-4 py-3 text-foreground" x-text="(entry.organicClicks || entry.averageOrganicClicks || 0).toLocaleString()"></td>
-                                <td class="px-4 py-3 text-foreground" x-text="(entry.paidKeywords || entry.totalAdsPurchased || 0).toLocaleString()"></td>
+                                <td class="px-4 py-3 font-medium text-heading-foreground" x-text="entry.keyword || '-'"></td>
+                                <td class="px-4 py-3 text-foreground" x-text="entry.endRank || entry.startRank || '-'"></td>
+                                <td class="px-4 py-3">
+                                    <span :class="(entry.rankChange || 0) > 0 ? 'text-red-500' : (entry.rankChange || 0) < 0 ? 'text-green-600' : 'text-foreground/50'" x-text="(entry.rankChange || 0) === 0 ? '-' : ((entry.rankChange > 0 ? '+' : '') + entry.rankChange)"></span>
+                                </td>
+                                <td class="px-4 py-3 text-foreground" x-text="(entry.searchVolume || 0).toLocaleString()"></td>
+                                <td class="px-4 py-3 text-foreground" x-text="(entry.endClicks || 0).toLocaleString()"></td>
                             </tr>
                         </template>
                     </tbody>
