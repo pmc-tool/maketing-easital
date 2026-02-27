@@ -1,6 +1,6 @@
 {
   "name": "SEO tool",
   "type": "extension",
-  "version": "3.5",
-  "description": "SEO tool extension for magicai"
+  "version": "4.0",
+  "description": "Comprehensive SEO tool extension for magicai with SpyFu API integration, keyword research, competitor analysis, domain analysis, SERP tracking, site audit, PPC intelligence, and AI-powered content optimization."
 }

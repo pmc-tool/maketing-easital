@@ -29,6 +29,7 @@ use App\Domains\Engine\Drivers\PixabayEngineDriver;
 use App\Domains\Engine\Drivers\PlagiarismCheckEngineDriver;
 use App\Domains\Engine\Drivers\SerperEngineDriver;
 use App\Domains\Engine\Drivers\SpeechifyEngineDriver;
+use App\Domains\Engine\Drivers\SpyfuEngineDriver;
 use App\Domains\Engine\Drivers\StableDiffusionEngineDriver;
 use App\Domains\Engine\Drivers\SynthesiaEngineDriver;
 use App\Domains\Engine\Drivers\TogetherEngineDriver;
@@ -81,6 +82,7 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
     case Speechify = 'speechify';
 
     case SERPER = 'serper';
+    case SPYFU = 'spyfu';
     case PERPLEXITY = 'perplexity';
 
     case CLIPDROP = 'clipdrop';
@@ -131,6 +133,7 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
             self::AZURE                  => __('Azure'),
             self::Speechify              => __('Speechify TTS'),
             self::SERPER                 => __('Serper'),
+            self::SPYFU                  => __('SpyFu'),
             self::PERPLEXITY             => __('Perplexity'),
             self::CLIPDROP               => __('Clipdrop'),
             self::NOVITA                 => __('Novita'),
@@ -169,6 +172,7 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
             self::AZURE            => AzureEngineDriver::class,
             self::Speechify        => SpeechifyEngineDriver::class,
             self::SERPER           => SerperEngineDriver::class,
+            self::SPYFU            => SpyfuEngineDriver::class,
             self::PERPLEXITY       => PerplexityEngineDriver::class,
             self::CLIPDROP         => ClipDropEngineDriver::class,
             self::NOVITA           => NovitaEngineDriver::class,
@@ -324,6 +328,7 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
             ],
             self::Speechify         => [EntityEnum::Speechify],
             self::SERPER            => [EntityEnum::SERPER],
+            self::SPYFU             => [EntityEnum::SPYFU],
             self::PERPLEXITY        => [EntityEnum::PERPLEXITY],
             self::CLIPDROP          => [EntityEnum::CLIPDROP],
             self::NOVITA            => [EntityEnum::NOVITA],

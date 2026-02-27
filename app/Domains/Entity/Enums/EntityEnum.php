@@ -44,6 +44,7 @@ use App\Domains\Entity\Drivers\PixabayDriver;
 use App\Domains\Entity\Drivers\PlagiarismCheckDriver;
 use App\Domains\Entity\Drivers\SerperDriver;
 use App\Domains\Entity\Drivers\SpeechifyDriver;
+use App\Domains\Entity\Drivers\SpyfuDriver;
 use App\Domains\Entity\Drivers\StableDiffusion;
 use App\Domains\Entity\Drivers\SynthesiaDriver;
 use App\Domains\Entity\Drivers\Together;
@@ -242,6 +243,8 @@ enum EntityEnum: string
     case Speechify = 'speechify';
 
     case SERPER = 'serper';
+
+    case SPYFU = 'spyfu';
 
     case PERPLEXITY = 'perplexity';
 
@@ -574,6 +577,8 @@ enum EntityEnum: string
             self::Speechify => __('Speechify for TTS'),
             // Serper
             self::SERPER => __('Serper for Realtime Data'),
+            // SpyFu
+            self::SPYFU => __('SpyFu for SEO Intelligence'),
             // Perplexity
             self::PERPLEXITY => __('Perplexity for Realtime Data'),
             // Midjourney
@@ -836,6 +841,8 @@ enum EntityEnum: string
             self::Speechify => EngineEnum::Speechify,
             // Serper
             self::SERPER => EngineEnum::SERPER,
+            // SpyFu
+            self::SPYFU => EngineEnum::SPYFU,
             // Perplexity
             self::PERPLEXITY => EngineEnum::PERPLEXITY,
             // PIAPI
@@ -1014,6 +1021,7 @@ enum EntityEnum: string
             self::AZURE_OPENAI             => AzureOpenaiDriver::class,
             self::Speechify                => SpeechifyDriver::class,
             self::SERPER                   => SerperDriver::class,
+            self::SPYFU                    => SpyfuDriver::class,
             self::PERPLEXITY               => PerplexityDriver::class,
             // PiAPI
             self::MIDJOURNEY => MidjourneyDriver::class,
@@ -1248,6 +1256,9 @@ enum EntityEnum: string
 
             // Serper
             self::SERPER => 0.001,
+
+            // SpyFu
+            self::SPYFU => 0.002,
 
             // Perplexity
             self::PERPLEXITY => 0.00002,

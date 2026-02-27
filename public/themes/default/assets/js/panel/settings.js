@@ -1006,6 +1006,37 @@ function serperSettingsSave() {
 	} );
 	return false;
 }
+function spyfuSettingsSave() {
+	"use strict";
+
+	document.getElementById( "settings_button" ).disabled = true;
+	document.getElementById( "settings_button" ).innerHTML = magicai_localize.please_wait;
+
+	var formData = new FormData();
+	formData.append( 'spyfu_api_key', $( "#spyfu_api_key" ).val() );
+
+	$.ajax( {
+	    type: "post",
+	 	url: "/dashboard/admin/settings/spyfuapi-save",
+	 	data: formData,
+	 	contentType: false,
+	 	processData: false,
+	 	success: function ( data ) {
+	 		toastr.success(magicai_localize?.settings_saved ||'Settings saved succesfully')
+	 		document.getElementById( "settings_button" ).disabled = false;
+	 		document.getElementById( "settings_button" ).innerHTML = "Save";
+	 	},
+	 	error: function ( data ) {
+			var err = data.responseJSON.errors;
+			$.each( err, function ( index, value ) {
+				toastr.error( value );
+			} );
+			document.getElementById( "settings_button" ).disabled = false;
+			document.getElementById( "settings_button" ).innerHTML = "Save";
+		}
+	} );
+	return false;
+}
 function clipdropSettingsSave() {
 	"use strict";
 

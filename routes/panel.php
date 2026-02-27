@@ -680,6 +680,10 @@ Route::middleware(['auth', 'updateUserActivity'])
                     Route::get('/serperapi/test', [SettingsController::class, 'serperapiTest'])->name('serperapi.test');
                     Route::post('/serperapi-save', [SettingsController::class, 'serperapiSave']);
 
+                    Route::get('/spyfuapi', [SettingsController::class, 'spyfuapi'])->name('spyfuapi');
+                    Route::get('/spyfuapi/test', [SettingsController::class, 'spyfuapiTest'])->name('spyfuapi.test');
+                    Route::post('/spyfuapi-save', [SettingsController::class, 'spyfuapiSave']);
+
                     Route::get('/tts', [SettingsController::class, 'tts'])->name('tts');
                     Route::post('/tts-save', [SettingsController::class, 'ttsSave']);
 

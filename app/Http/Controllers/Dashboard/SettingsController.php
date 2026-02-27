@@ -657,6 +657,54 @@ class SettingsController extends Controller
         }
     }
 
+    public function spyfuapi(Request $request)
+    {
+        return view('panel.admin.settings.spyfuapi');
+    }
+
+    public function spyfuapiSave(Request $request)
+    {
+        $settings = SettingTwo::getCache();
+        if (Helper::appIsNotDemo()) {
+            $settings->spyfu_api_key = $request->spyfu_api_key;
+            $settings->save();
+        }
+
+        return response()->json([], 200);
+    }
+
+    public function spyfuapiTest()
+    {
+        try {
+            $settings = SettingTwo::getCache();
+            if (empty($settings->spyfu_api_key)) {
+                echo 'You must provide SpyFu API Key.';
+
+                return;
+            }
+            $client = new Client;
+            $response = $client->get('https://www.spyfu.com/apis/domain_api/v2/domain/getOrganicKeywords', [
+                'headers' => [
+                    'Authorization' => 'Basic ' . $settings->spyfu_api_key,
+                    'Accept'        => 'application/json',
+                ],
+                'query' => [
+                    'domain'   => 'google.com',
+                    'startRow' => 0,
+                    'maxRows'  => 1,
+                    'country'  => 'US',
+                ],
+            ]);
+            $responseData = json_decode($response->getBody(), true);
+            echo '<br>SpyFu API Key - SUCCESS<br><hr>Test query for "google.com" returned data successfully.<br>';
+            if (isset($responseData['resultCount'])) {
+                echo 'Result count: ' . $responseData['resultCount'] . '<br>';
+            }
+        } catch (Exception $e) {
+            echo $e->getMessage() . ' - FAILED<br>';
+        }
+    }
+
     public function xAiTest()
     {
         if (Helper::appIsDemo()) {

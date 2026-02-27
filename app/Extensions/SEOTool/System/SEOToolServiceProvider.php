@@ -4,7 +4,15 @@ declare(strict_types=1);
 
 namespace App\Extensions\SEOTool\System;
 
+use App\Extensions\SEOTool\System\Http\Controllers\CompetitorAnalysisController;
+use App\Extensions\SEOTool\System\Http\Controllers\ContentOptimizerController;
+use App\Extensions\SEOTool\System\Http\Controllers\DashboardController;
+use App\Extensions\SEOTool\System\Http\Controllers\DomainAnalysisController;
+use App\Extensions\SEOTool\System\Http\Controllers\KeywordResearchController;
+use App\Extensions\SEOTool\System\Http\Controllers\PPCIntelligenceController;
 use App\Extensions\SEOTool\System\Http\Controllers\SeoController;
+use App\Extensions\SEOTool\System\Http\Controllers\SerpTrackerController;
+use App\Extensions\SEOTool\System\Http\Controllers\SiteAuditController;
 use App\Http\Middleware\CheckTemplateTypeAndPlan;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Routing\Router;
@@ -78,6 +86,8 @@ class SEOToolServiceProvider extends ServiceProvider
                             ->prefix('user')
                             ->name('user.')
                             ->group(function (Router $router) {
+
+                                // Existing SEO Controller routes
                                 $router
                                     ->controller(SeoController::class)
                                     ->prefix('seo')
@@ -90,6 +100,83 @@ class SEOToolServiceProvider extends ServiceProvider
                                         Route::post('genSEO', 'genSEO')->name('genSEO');
                                         Route::post('analyseArticle', 'analyseArticle')->name('analyseArticle');
                                         Route::post('improveArticle', 'improveArticle')->name('improveArticle');
+                                    });
+
+                                // Dashboard / Quick Lookup
+                                $router
+                                    ->controller(DashboardController::class)
+                                    ->prefix('seo/dashboard')
+                                    ->name('seo.dashboard.')
+                                    ->group(function () {
+                                        Route::post('quick-lookup', 'quickDomainLookup')->name('quickLookup');
+                                    });
+
+                                // Keyword Research
+                                $router
+                                    ->controller(KeywordResearchController::class)
+                                    ->prefix('seo/keywords')
+                                    ->name('seo.keywords.')
+                                    ->group(function () {
+                                        Route::post('research', 'research')->name('research');
+                                        Route::post('related', 'getRelated')->name('related');
+                                    });
+
+                                // Competitor Analysis
+                                $router
+                                    ->controller(CompetitorAnalysisController::class)
+                                    ->prefix('seo/competitors')
+                                    ->name('seo.competitors.')
+                                    ->group(function () {
+                                        Route::post('analyze', 'analyze')->name('analyze');
+                                        Route::post('kombat', 'kombat')->name('kombat');
+                                    });
+
+                                // Domain Analysis
+                                $router
+                                    ->controller(DomainAnalysisController::class)
+                                    ->prefix('seo/domain')
+                                    ->name('seo.domain.')
+                                    ->group(function () {
+                                        Route::post('analyze', 'analyze')->name('analyze');
+                                        Route::post('backlinks', 'backlinks')->name('backlinks');
+                                    });
+
+                                // SERP Tracker
+                                $router
+                                    ->controller(SerpTrackerController::class)
+                                    ->prefix('seo/serp')
+                                    ->name('seo.serp.')
+                                    ->group(function () {
+                                        Route::post('track', 'trackRanking')->name('track');
+                                        Route::post('history', 'domainHistory')->name('history');
+                                    });
+
+                                // Site Audit
+                                $router
+                                    ->controller(SiteAuditController::class)
+                                    ->prefix('seo/audit')
+                                    ->name('seo.audit.')
+                                    ->group(function () {
+                                        Route::post('run', 'audit')->name('run');
+                                    });
+
+                                // PPC Intelligence
+                                $router
+                                    ->controller(PPCIntelligenceController::class)
+                                    ->prefix('seo/ppc')
+                                    ->name('seo.ppc.')
+                                    ->group(function () {
+                                        Route::post('overview', 'overview')->name('overview');
+                                        Route::post('ad-history', 'adHistory')->name('adHistory');
+                                    });
+
+                                // Content Optimizer
+                                $router
+                                    ->controller(ContentOptimizerController::class)
+                                    ->prefix('seo/optimizer')
+                                    ->name('seo.optimizer.')
+                                    ->group(function () {
+                                        Route::post('optimize', 'optimize')->name('optimize');
                                     });
                             });
 
