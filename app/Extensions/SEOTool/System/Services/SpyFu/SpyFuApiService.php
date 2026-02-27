@@ -6,7 +6,8 @@ namespace App\Extensions\SEOTool\System\Services\SpyFu;
 
 use App\Models\SettingTwo;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 
 class SpyFuApiService
 {
@@ -29,16 +30,24 @@ class SpyFuApiService
         ]);
     }
 
-    /**
-     * @throws GuzzleException
-     */
     public function get(string $endpoint, array $params = []): array
     {
-        $response = $this->client->get($this->baseUrl . $endpoint, [
-            'query' => $params,
-        ]);
+        try {
+            $response = $this->client->get($this->baseUrl . $endpoint, [
+                'query' => $params,
+            ]);
 
-        return json_decode($response->getBody()->getContents(), true) ?? [];
+            return json_decode($response->getBody()->getContents(), true) ?? [];
+        } catch (ServerException $e) {
+            // SpyFu returns 500 when it has no data for a domain/keyword
+            return ['resultCount' => 0, 'results' => [], '_error' => 'No data available from SpyFu for this query.'];
+        } catch (ClientException $e) {
+            $status = $e->getResponse()->getStatusCode();
+            if ($status === 404) {
+                return ['resultCount' => 0, 'results' => [], '_error' => 'No data found for this query.'];
+            }
+            throw $e;
+        }
     }
 
     // ─── Domain Stats API ─────────────────────────────────────────
