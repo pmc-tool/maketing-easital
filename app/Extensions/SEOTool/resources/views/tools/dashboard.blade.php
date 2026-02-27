@@ -9,7 +9,7 @@
             domain: this.domain,
             country: this.country
         });
-        if (data) this.stats = data.result;
+        if (data && data.result) this.stats = data.result.results?.[0] || data.result;
     }
 }">
     <div class="mb-8">
@@ -28,19 +28,19 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div class="rounded-xl border border-border bg-background p-4 transition-shadow hover:shadow-md">
                 <p class="text-xs font-medium text-foreground/60">{{ __('Organic Keywords') }}</p>
-                <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="(stats.organicKeywords || stats.totalOrganicResults || 0).toLocaleString()"></p>
+                <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="(stats.totalOrganicResults || 0).toLocaleString()"></p>
             </div>
             <div class="rounded-xl border border-border bg-background p-4 transition-shadow hover:shadow-md">
                 <p class="text-xs font-medium text-foreground/60">{{ __('Monthly Organic Clicks') }}</p>
-                <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="(stats.monthlyOrganicClicks || stats.averageOrganicClicks || 0).toLocaleString()"></p>
+                <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="(stats.monthlyOrganicClicks || 0).toLocaleString()"></p>
             </div>
             <div class="rounded-xl border border-border bg-background p-4 transition-shadow hover:shadow-md">
                 <p class="text-xs font-medium text-foreground/60">{{ __('Paid Keywords') }}</p>
-                <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="(stats.paidKeywords || stats.totalAdsPurchased || 0).toLocaleString()"></p>
+                <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="(stats.totalAdsPurchased || 0).toLocaleString()"></p>
             </div>
             <div class="rounded-xl border border-border bg-background p-4 transition-shadow hover:shadow-md">
-                <p class="text-xs font-medium text-foreground/60">{{ __('Estimated Monthly PPC Budget') }}</p>
-                <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="'$' + (stats.monthlyPpcBudget || stats.averageAdBudget || 0).toLocaleString()"></p>
+                <p class="text-xs font-medium text-foreground/60">{{ __('Monthly PPC Budget') }}</p>
+                <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="'$' + (stats.monthlyBudget || 0).toLocaleString()"></p>
             </div>
         </div>
     </template>

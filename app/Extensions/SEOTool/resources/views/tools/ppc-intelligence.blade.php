@@ -12,7 +12,11 @@
             domain: this.domain,
             country: this.country
         });
-        if (data && data.result) this.ppcData = data.result;
+        if (data && data.result) {
+            this.ppcData = data.result;
+            // Flatten stats from results[0]
+            this.ppcData._stats = data.result.stats?.results?.[0] || {};
+        }
     },
 
     async getAdHistory() {
@@ -47,19 +51,19 @@
                 <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <div class="rounded-xl border border-border bg-background p-4">
                         <p class="text-xs font-medium text-foreground/60">{{ __('Paid Keywords') }}</p>
-                        <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="(ppcData.stats?.paidKeywords || ppcData.stats?.totalAdsPurchased || 0).toLocaleString()"></p>
+                        <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="(ppcData._stats?.totalAdsPurchased || 0).toLocaleString()"></p>
                     </div>
                     <div class="rounded-xl border border-border bg-background p-4">
                         <p class="text-xs font-medium text-foreground/60">{{ __('Monthly PPC Budget') }}</p>
-                        <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="'$' + (ppcData.stats?.monthlyPpcBudget || ppcData.stats?.averageAdBudget || 0).toLocaleString()"></p>
+                        <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="'$' + (ppcData._stats?.monthlyBudget || 0).toLocaleString()"></p>
                     </div>
                     <div class="rounded-xl border border-border bg-background p-4">
-                        <p class="text-xs font-medium text-foreground/60">{{ __('Monthly PPC Clicks') }}</p>
-                        <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="(ppcData.stats?.monthlyPpcClicks || ppcData.stats?.averageAdClicks || 0).toLocaleString()"></p>
+                        <p class="text-xs font-medium text-foreground/60">{{ __('Monthly Paid Clicks') }}</p>
+                        <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="(ppcData._stats?.monthlyPaidClicks || 0).toLocaleString()"></p>
                     </div>
                     <div class="rounded-xl border border-border bg-background p-4">
-                        <p class="text-xs font-medium text-foreground/60">{{ __('Avg CPC') }}</p>
-                        <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="'$' + (ppcData.stats?.averageCpc || ppcData.stats?.avgCostPerClick || 0).toFixed(2)"></p>
+                        <p class="text-xs font-medium text-foreground/60">{{ __('Avg Ad Rank') }}</p>
+                        <p class="mt-1 text-2xl font-bold text-heading-foreground" x-text="(ppcData._stats?.averageAdRank || 0).toFixed(1)"></p>
                     </div>
                 </div>
 
