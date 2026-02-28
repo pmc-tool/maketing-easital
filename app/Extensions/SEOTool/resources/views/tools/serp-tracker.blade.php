@@ -16,6 +16,18 @@
         });
         if (data && data.result) {
             this.rankingHistory = data.result;
+            // Compute rank info from historical data
+            if (this.rankingHistory.results?.length > 0) {
+                this.rankingHistory.results.forEach(item => {
+                    const rankData = item.results || item.historicalRanks || {};
+                    const sortedKeys = Object.keys(rankData).sort();
+                    if (sortedKeys.length > 0) {
+                        item._startRank = rankData[sortedKeys[0]];
+                        item._endRank = rankData[sortedKeys[sortedKeys.length - 1]];
+                        item._rankChange = item._startRank - item._endRank;
+                    }
+                });
+            }
             this.$nextTick(() => this.renderChart());
         }
     },
@@ -42,7 +54,6 @@
         const results = this.rankingHistory.results || [];
         if (results.length === 0) return;
 
-        // For keyword tracking: results[0].results is {YYYYMM: rank}
         const item = results[0];
         const rankData = item.results || item.historicalRanks || {};
         const sortedKeys = Object.keys(rankData).sort();
@@ -91,10 +102,9 @@
                     <option value="CA">CA</option>
                     <option value="AU">AU</option>
                 </select>
-                <x-button variant="primary" @click="trackKeyword()">
-                    <x-tabler-chart-line class="size-4" />
+                <button class="btn btn-primary" @click="trackKeyword()">
                     {{ __('Track') }}
-                </x-button>
+                </button>
             </div>
         </div>
 
@@ -113,9 +123,12 @@
                         <div class="rounded-lg border border-border bg-background px-4 py-2">
                             <span class="text-xs text-foreground/60" x-text="item.domain || item.keyword"></span>
                             <div class="flex items-center gap-2">
-                                <span class="text-lg font-bold text-heading-foreground" x-text="'#' + (item.endRank || item.startRank || '-')"></span>
-                                <template x-if="(item.rankChange || 0) !== 0">
-                                    <span class="text-xs font-medium" :class="item.rankChange > 0 ? 'text-red-500' : 'text-green-600'" x-text="(item.rankChange > 0 ? '+' : '') + item.rankChange"></span>
+                                <span class="text-lg font-bold text-heading-foreground" x-text="'#' + (item._endRank || item.endRank || '-')"></span>
+                                <template x-if="(item._rankChange || item.rankChange || 0) !== 0">
+                                    <span class="text-xs font-medium"
+                                        :class="(item._rankChange || item.rankChange || 0) > 0 ? 'text-green-600' : 'text-red-500'"
+                                        x-text="((item._rankChange || item.rankChange || 0) > 0 ? '+' : '') + (item._rankChange || item.rankChange)">
+                                    </span>
                                 </template>
                             </div>
                         </div>
@@ -138,7 +151,7 @@
     </template>
 
     {{-- Domain History Data --}}
-    <template x-if="domainHistory && activeTab === 'domain'">
+    <template x-if="domainHistory && domainHistory.results?.length > 0 && activeTab === 'domain'">
         <div class="rounded-xl border border-border bg-background p-6">
             <h3 class="mb-4 text-sm font-semibold text-heading-foreground">
                 {{ __('Domain Ranking History') }}
@@ -170,6 +183,13 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </template>
+
+    {{-- No domain history results --}}
+    <template x-if="domainHistory && (!domainHistory.results || domainHistory.results.length === 0) && activeTab === 'domain'">
+        <div class="rounded-xl border border-border bg-background p-8 text-center">
+            <p class="text-sm text-foreground/50">{{ __('No ranking history found for this domain. Try a more popular domain.') }}</p>
         </div>
     </template>
 </div>

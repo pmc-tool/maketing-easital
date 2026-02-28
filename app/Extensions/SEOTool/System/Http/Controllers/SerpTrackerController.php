@@ -55,9 +55,10 @@ class SerpTrackerController extends Controller
             }
 
             $rankingService = new SpyFuRankingService;
-            $result = $rankingService->getDomainStatsHistory(
+            $result = $rankingService->getRankingHistoryForDomain(
                 $request->domain,
-                $request->country ?? 'US'
+                $request->country ?? 'US',
+                50
             );
 
             $driver->input(json_encode($result))->calculateCredit()->decreaseCredit();
